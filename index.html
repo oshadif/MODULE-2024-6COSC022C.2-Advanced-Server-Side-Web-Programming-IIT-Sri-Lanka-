@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+</head>
+<body>
+
+    <h2>Student Form</h2>
+    <input type="text" id="name" placeholder="Name">
+    <input type="number" id="mark" placeholder="Mark">
+    <input type="number" id="age" placeholder="Age">
+    <button onclick="addStudent()">Add Student</button>
+
+    <h2>Student List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Mark</th>
+                <th>Age</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+
+    <script>
+        async function fetchStudents() {
+            const response = await fetch('http://localhost:5000/students');
+            const students = await response.json();
+            const table = document.getElementById('studentTable');
+            table.innerHTML = '';
+            students.forEach(student => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${student.name}</td>
+                        <td>${student.mark}</td>
+                        <td>${student.age}</td>
+                        <td>
+                            <button onclick="editStudent(${student.id})">Edit</button>
+                            <button onclick="deleteStudent(${student.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function addStudent() {
+            const name = document.getElementById('name').value;
+            const mark = document.getElementById('mark').value;
+            const age = document.getElementById('age').value;
+
+            await fetch('http://localhost:5000/add-student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, mark, age })
+            });
+            fetchStudents();
+        }
+
+        async function deleteStudent(id) {
+            await fetch(`http://localhost:5000/delete-student/${id}`, { method: 'DELETE' });
+            fetchStudents();
+        }
+
+        fetchStudents(); // Load students on page load
+    </script>
+
+</body>
+</html>
